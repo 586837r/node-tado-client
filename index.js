@@ -4,6 +4,7 @@ const EXPIRATION_WINDOW_IN_SECONDS = 300;
 
 const tado_auth_url = 'https://auth.tado.com';
 const tado_url = 'https://my.tado.com';
+const tado_v1_url = 'https://acme.tado.com';
 const oauth_path = '/oauth/token';
 const tado_config = {
     client: {
@@ -67,7 +68,7 @@ class Tado {
 
     async apiCall(url, method = 'get', data = {}) {
         await this._refreshToken();
-
+	
         const response = await axios({
             url: tado_url + url,
             method: method,
@@ -275,6 +276,24 @@ class Tado {
     async getAirComfort(home_id) {
         return this.apiCall(`/api/v2/homes/${home_id}/airComfort`);
     }
+
+    async getAirComfortV1(home_id, language, latitude, longitude) {
+	await this._refreshToken();
+
+        const response = await axios({
+            url: tado_v1_url + `/v1/homes/${home_id}/airComfort?latitude=${latitude}&longitude=${longitude}`,
+            method: 'get',
+            headers: {
+                Authorization: 'Bearer ' + this._accessToken.token.access_token,
+                'Accept-Language': language
+            }
+        });
+
+        return response.data;
+    }
+
+
+
 }
 
 module.exports = Tado;
